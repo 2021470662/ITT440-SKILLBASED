@@ -1,0 +1,38 @@
+import socket
+
+def bar_to_atm(pressure_bar):
+    return pressure_bar * 0.986923
+
+def handle_client(client_socket):
+    try:
+        # Receive the pressure value in bar from the client
+        data = client_socket.recv(1024)
+        pressure_bar = float(data.decode())
+
+        # Convert pressure to atmosphere-standard (atm)
+        pressure_atm = bar_to_atm(pressure_bar)
+
+        # Send the converted value back to the client
+        client_socket.send(str(pressure_atm).encode())
+    except Exception as e:
+        print("Error:", e)
+    finally:
+        client_socket.close()
+
+def main():
+    server_host = "0.0.0.0"
+    server_port = 8080
+
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((server_host, server_port))
+    server_socket.listen(1)
+
+    print("Server is listening for incoming connections...")
+
+    while True:
+        client_socket, client_address = server_socket.accept()
+        print("Connection established with:", client_address)
+        handle_client(client_socket)
+
+if __name__ == "__main__":
+    main()
